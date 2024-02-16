@@ -1,0 +1,62 @@
+---
+- name: Install GitLab CE on Ubuntu/Debian
+  hosts: gitlab_servers  # Update this with your actual target hosts or groups
+  become: true
+  vars:
+    gitlab_external_url: "http://gitlab.example.com"  # Update this with your GitLab external URL
+
+  pre_tasks:
+    - name: Pre-configure Postfix selections
+      debconf:
+        name: postfix
+        question: "{{ item.key }}"
+        vtype: "{{ item.value.type }}"
+        value: "{{ item.value.value }}"
+      loop:
+        - key: "postfix/mailname"
+          value: { type: "string", value: "{{ ansible_fqdn }}" }
+        - key: "postfix/main_mailer_type"
+          value: { type: "select", value: "Internet Site" }
+
+  tasks:
+    - name: Update APT package cache
+      apt:
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - openssh-server
+          - ca-certificates
+          - tzdata
+          - perl
+        state: present
+
+    - name: Install Postfix non-interactively
+      apt:
+        name: postfix
+        state: present
+      environment:
+        DEBIAN_FRONTEND: noninteractive
+
+    - name: Download GitLab installation script
+      get_url:
+        url: https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh
+        dest: /tmp/script.deb.sh
+        mode: '0755'
+
+    - name: Execute GitLab installation script
+      command: bash /tmp/script.deb.sh
+      args:
+        creates: /etc/apt/sources.list.d/gitlab_gitlab-ce.list
+
+    - name: Install GitLab CE
+      apt:
+        name: gitlab-ce
+        state: present
+        update_cache: yes  # Ensuring the cache is updated after adding GitLab's repository
+
+  handlers:
+    - name: Reconfigure GitLab
+      command: gitlab-ctl reconfigure

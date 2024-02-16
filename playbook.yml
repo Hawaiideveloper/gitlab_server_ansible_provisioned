@@ -1,0 +1,20 @@
+---
+- name: Configure GitLab CE on Ubuntu Bionic
+  hosts: all
+  become: true
+  vars:
+    gitlab_edition: "ce"  # Assuming Community Edition (CE) by default
+    gitlab_dependencies:
+      - git
+      - curl
+      - gnupg2  # Moved here for simplification
+    gitlab_download_validate_certs: true
+    gitlab_version: "16.9.0-ce.0"  # Define GitLab version for consistency
+    gitlab_package_version_separator: "_"  # Separator used in package naming
+    gitlab_config_template: "gitlab.rb.j2"  # Assuming a Jinja2 template for GitLab configuration
+    gitlab_create_self_signed_cert: false  # Conditional for creating SSL cert
+    gitlab_self_signed_cert_subj: "/C=US/ST=State/L=City/O=Organization/CN=gitlab.example.com"
+    gitlab_ssl_certificate_key: "/etc/gitlab/ssl/gitlab.example.com.key"
+    gitlab_ssl_certificate: "/etc/gitlab/ssl/gitlab.example.com.crt"
+  tasks:
+    - include_tasks: tasks/main.yml

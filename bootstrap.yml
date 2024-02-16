@@ -1,0 +1,47 @@
+---
+- name: Configure user and SSH public key for user
+  hosts: your_target_hosts
+  become: true
+  vars:
+    ansible_user: a_person  # Specify the user for which you want to add the public key
+
+  tasks:
+    - name: Create user
+      user:
+        name: "{{ ansible_user }}"
+        state: present
+        shell: /bin/bash
+        createhome: yes
+
+    - name: Ensure SSH directory exists for the user
+      file:
+        path: "/home/{{ ansible_user }}/.ssh"
+        state: directory
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+        mode: "0700"
+
+    - name: Add SSH public key to authorized_keys file
+      authorized_key:
+        user: "{{ ansible_user }}"
+        key: "ssh-rsa AAAAB3NzaC1yc2EAAAADtyperacterscamefromyoyurpubofyourid_rsa.pubspppoMOgkinyourrandomcharacterssoyoucanauthenticaDy/gDd15/61z1OI8UrVkLtAtebutremebertheserandomchaY7lscdDdnDsuxdTmdBS0nsKAyOgunpJ/c4vRS6rik72CPJNT4mZ1WbGtm9XJ2QcJGudFiLU+b1jQfgO/hezQeDIpe3OwnNmUCBa7ZFgxXczIKha1RUS0QxtfYnaBwK5Mw3cHhDdBfJnogf6dUwAKquJCdtGQmim8YQJKaR93IwJTnQlLYaUEz8QtyAgRL4pDxjJedHJTUbNV3rR2pwXNJn8iDhvo/iFelmEZ2PVHiqzicEdipGZNAkQ0kf2V1PPS/qJU1SeWiBt0Dp99DhrJEO6gnMR11ZyhLcyAX6wyOiY4KaujNskOP1NhLVww5L+hWAoZT6cbPqZq9nGyJsD6CJ5rNHdJf503q8iwmxT0QoPqO6XrCn9etL9XxI4tDT0MYDTmGdXHOMQZDR9rmQtRNvnF+doItlmf+i9VOUiTQIzNMdTLuIjyF693E75BcuxnusJ18QPQ7bl9m6zEMMoeXQxDkJwm7oMJBnbSqqX4s511MnwCmuMgZoA21dUU+Bx46qYfi0RCyQclFrAyxlQwpSIGFw== hawaii@mail.com"
+        state: present
+
+    - name: Ensure sudoers file exists
+      file:
+        path: /etc/sudoers.d/sudoers_a_person 
+        state: touch
+        mode: 0440
+        owner: root
+        group: root
+
+    - name: Add sudoers entry
+      lineinfile:
+        path: /etc/sudoers.d/sudoers_a_person 
+        line: "{{ ansible_user }} ALL=(ALL) NOPASSWD: ALL"
+        validate: 'visudo -cf %s'
+
+    - name: Restart SSH service
+      service:
+        name: sshd
+        state: restarted
