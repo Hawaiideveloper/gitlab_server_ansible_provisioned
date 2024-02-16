@@ -17,3 +17,11 @@ _Replace 'http://gitlab.example.com' with your server's actual external URL. If 
 ### Finally print out the /etc/gitlab/initial_root_password file and use that along with the username root to login for the first time
 
 ```sudo cat /etc/gitlab/initial_root_password```
+
+
+
+Some possible improvements would be to make a template file and allow the user of this repo to make the one change of their ip so that they
+
+do not need to login and do the manual changes above; however being that it is 2:19am I am tired and will not be doing anymore contributions to this project 
+
+unless it breaks or someone pays me,
