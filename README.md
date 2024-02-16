@@ -1,3 +1,8 @@
+### First run this to gain control of your server
+ansible-playbook -i inventory.ini bootstrap.yml --ask-become-pass
+
+
+
 ### Run this:
  ```ansible-playbook -i inventory.ini install_gitlab_ce.yml```
 
